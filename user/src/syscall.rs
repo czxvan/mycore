@@ -16,6 +16,10 @@ pub fn syscall(id: usize, args: [usize; 3]) -> isize {
     ret
 }
 
+pub fn sys_write(fd: usize, buf: *const u8, len: usize) -> isize {
+    syscall(64, [fd, buf as usize, len])
+}
+
 pub fn sys_exit(code: isize) -> isize{
     syscall(EXIT, [code as usize, 0, 0])
 }
