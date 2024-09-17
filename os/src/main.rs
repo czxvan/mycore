@@ -1,9 +1,12 @@
 #![no_main]
 #![no_std]
 use core::arch::global_asm;
+
 mod lang_items;
 mod sbi;
+#[macro_use]
 mod console;
+mod logging;
 
 use sbi::shutdown;
 
@@ -11,12 +14,7 @@ global_asm!(include_str!("entry.asm"));
 
 #[no_mangle]
 fn rust_main() {
-    // println!("Hello, world!");
-    
     clear_bss();
-    
-    println!("hello, world!");
-    println!("你好，世界！");
     
     print_memory_layout();
     // panic!("czxcx");
@@ -36,11 +34,27 @@ fn print_memory_layout() {
         fn boot_stack_lower_bound();
         fn boot_stack_top();
     }
-    info!(".text\t[{:#x}, {:#x})", stext as usize, etext as usize);
-    info!(".rodata\t[{:#x}, {:#x})", srodata as usize, erodata as usize);
-    println!(".data\t[{:#x}, {:#x})", sdata as usize, edata as usize);
-    println!(".bss\t[{:#x}, {:#x})", sbss as usize, ebss as usize);
-    debug!(".stack\t[{:#x}, {:#x})", boot_stack_lower_bound as usize, boot_stack_top as usize);
+    logging::init();
+    println!("[kernel] Hello, world!");
+    log::trace!(
+        "[kernel] .text  \t[{:#x}, {:#x})",
+        stext as usize, etext as usize
+    );
+    log::debug!(
+        "[kernel] .rodata\t[{:#x}, {:#x})",
+        srodata as usize, erodata as usize
+    );
+    log::info!(
+        "[kernel] .data  \t[{:#x}, {:#x})",
+        sdata as usize, edata as usize
+    );
+    log::warn!(
+        "[kernel] .stack \t[{:#x}, {:#x})",
+        boot_stack_lower_bound as usize, boot_stack_top as usize
+    );
+    log::error!("[kernel] .bss   \t[{:#x}, {:#x})",
+        sbss as usize, ebss as usize
+    );
 }
 
 fn clear_bss() {
